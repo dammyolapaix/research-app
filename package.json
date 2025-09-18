@@ -7,7 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier src/**/*.{ts,tsx} --write"
+    "format": "prettier src/ --write"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
