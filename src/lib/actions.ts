@@ -1,0 +1,38 @@
+'use server'
+
+import { redirect } from 'next/navigation'
+
+import { tasks } from '@trigger.dev/sdk'
+import { z } from 'zod'
+
+import type { findAndSummarizePapersTask } from '@/services/trigger/find-summarize-papers'
+
+import { validatedAction } from './action-middlewares'
+
+const researchSchema = z.object({
+  prompt: z.string().min(1),
+})
+
+type Research = z.infer<typeof researchSchema>
+
+export const researchAction = validatedAction(
+  researchSchema,
+  async (state: Research) => {
+    console.log('Research state: ', state)
+
+    const researchTask = await tasks.trigger<typeof findAndSummarizePapersTask>(
+      'find-and-summarize-papers',
+      {
+        prompt: state.prompt,
+        depth: 2,
+        breadth: 2,
+      }
+    )
+
+    console.log('Research task triggered successfully: ', researchTask)
+
+    redirect(
+      `/dashboard?taskId=${researchTask.id}&publicAccessToken=${researchTask.publicAccessToken}`
+    )
+  }
+)
