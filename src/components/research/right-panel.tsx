@@ -35,16 +35,10 @@ export function RightPanel({
   const hasSteps = steps.length > 0
   const hasResults = literatureReview.length > 0
 
-  // Auto-switch to results when literature review is available and steps are completed
-  if (
-    hasResults &&
-    !isGenerating &&
-    activeTab === 'steps' &&
-    completedSteps === totalSteps &&
-    totalSteps > 0
-  ) {
-    setTimeout(() => setActiveTab('results'), 500)
-  }
+  // Auto-switch to results when literature review is available
+  // if (hasResults && activeTab === 'steps') {
+  //   setTimeout(() => setActiveTab('results'), 500)
+  // }
 
   return (
     <div className="flex h-full flex-col bg-gray-900">

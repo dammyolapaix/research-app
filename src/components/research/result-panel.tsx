@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 
+import { ResearchEditor } from './research-editor'
+
 type ResultPanelProps = {
   literatureReview: string
   isGenerating: boolean
@@ -76,8 +78,8 @@ export function ResultPanel({
       className={`flex h-full flex-col bg-gray-900 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
     >
       {/* Header */}
-      <div className="border-b border-gray-800 p-4">
-        <div className="flex items-center justify-between">
+      <div className="border-b border-gray-800">
+        <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-blue-400" />
             <h2 className="text-lg font-semibold text-white">
@@ -127,49 +129,45 @@ export function ResultPanel({
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1 p-6">
+      <div className="flex-1 overflow-hidden">
         {isGenerating && !literatureReview ? (
-          <div className="space-y-4">
-            <Skeleton className="h-8 w-3/4 bg-gray-800" />
-            <Skeleton className="h-4 w-full bg-gray-800" />
-            <Skeleton className="h-4 w-full bg-gray-800" />
-            <Skeleton className="h-4 w-2/3 bg-gray-800" />
+          <ScrollArea className="h-full p-6">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4 bg-gray-800" />
+              <Skeleton className="h-4 w-full bg-gray-800" />
+              <Skeleton className="h-4 w-full bg-gray-800" />
+              <Skeleton className="h-4 w-2/3 bg-gray-800" />
 
-            <div className="mt-8">
-              <Skeleton className="h-6 w-1/2 bg-gray-800" />
-              <div className="mt-4 space-y-2">
-                <Skeleton className="h-4 w-full bg-gray-800" />
-                <Skeleton className="h-4 w-full bg-gray-800" />
-                <Skeleton className="h-4 w-3/4 bg-gray-800" />
+              <div className="mt-8">
+                <Skeleton className="h-6 w-1/2 bg-gray-800" />
+                <div className="mt-4 space-y-2">
+                  <Skeleton className="h-4 w-full bg-gray-800" />
+                  <Skeleton className="h-4 w-full bg-gray-800" />
+                  <Skeleton className="h-4 w-3/4 bg-gray-800" />
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <Skeleton className="h-6 w-2/3 bg-gray-800" />
+                <div className="mt-4 space-y-2">
+                  <Skeleton className="h-4 w-full bg-gray-800" />
+                  <Skeleton className="h-4 w-5/6 bg-gray-800" />
+                </div>
               </div>
             </div>
-
-            <div className="mt-8">
-              <Skeleton className="h-6 w-2/3 bg-gray-800" />
-              <div className="mt-4 space-y-2">
-                <Skeleton className="h-4 w-full bg-gray-800" />
-                <Skeleton className="h-4 w-5/6 bg-gray-800" />
-              </div>
-            </div>
-          </div>
+          </ScrollArea>
         ) : (
-          <div className="max-w-4xl">
-            <div
-              className="prose prose-invert max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: formatMarkdown(literatureReview),
+          <div className="h-full">
+            <ResearchEditor
+              initialContent={formatMarkdown(literatureReview)}
+              onContentChange={(content) => {
+                // Here you could handle content changes if needed
+                console.log('Content updated:', content)
               }}
             />
-
-            {isGenerating && (
-              <div className="mt-8 flex items-center gap-2 text-sm text-yellow-400">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-400"></div>
-                Continuing to generate more content...
-              </div>
-            )}
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       {/* Footer */}
       {literatureReview && !isGenerating && (
@@ -183,4 +181,3 @@ export function ResultPanel({
     </div>
   )
 }
-

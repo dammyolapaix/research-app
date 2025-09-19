@@ -1,0 +1,181 @@
+// Research Editor Styles - Optimized for Research UI Panel
+.research-editor-wrapper {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--tt-bg-color, #1a1a1a);
+}
+
+.research-editor-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.research-editor-content .tiptap.ProseMirror.research-editor {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--tt-theme-text, #ffffff);
+  background-color: transparent;
+  border: none;
+  outline: none;
+
+  // Custom scrollbar for the editor content
+  &::-webkit-scrollbar {
+    width: 0.25rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--tt-scrollbar-color, #4a5568);
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+// Mobile optimizations
+@media screen and (max-width: 768px) {
+  .research-editor-content .tiptap.ProseMirror.research-editor {
+    padding: 1rem;
+  }
+}
+
+// Dark theme adjustments for research UI
+.research-editor-wrapper {
+  --tt-theme-text: #ffffff;
+  --tt-bg-color: #1f2937;
+  --tt-scrollbar-color: #4b5563;
+}
+
+// Ensure proper text color inheritance
+.research-editor-content .tiptap.ProseMirror.research-editor {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--tt-theme-text, #ffffff);
+  }
+
+  p,
+  li,
+  blockquote {
+    color: var(--tt-theme-text, #ffffff);
+  }
+
+  // Code blocks and inline code
+  code {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+  }
+
+  pre {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.5rem;
+    padding: 1rem;
+
+    code {
+      background-color: transparent;
+      padding: 0;
+    }
+  }
+
+  // Blockquotes
+  blockquote {
+    border-left: 4px solid #3b82f6;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    background-color: rgba(59, 130, 246, 0.1);
+    border-radius: 0 0.25rem 0.25rem 0;
+  }
+
+  // Links
+  a {
+    color: #60a5fa;
+    text-decoration: underline;
+
+    &:hover {
+      color: #93c5fd;
+    }
+  }
+
+  // Lists
+  ul,
+  ol {
+    padding-left: 1.5rem;
+  }
+
+  // Task lists
+  ul[data-type='taskList'] {
+    list-style: none;
+    padding-left: 0;
+
+    li {
+      display: flex;
+      align-items: flex-start;
+
+      > label {
+        flex-shrink: 0;
+        margin-right: 0.5rem;
+        margin-top: 0.125rem;
+      }
+
+      > div {
+        flex: 1;
+      }
+    }
+  }
+
+  // Images
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
+  }
+
+  // Horizontal rules
+  hr {
+    border: none;
+    border-top: 2px solid #374151;
+    margin: 2rem 0;
+  }
+
+  // Highlights
+  mark {
+    background-color: #fbbf24;
+    color: #1f2937;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.125rem;
+  }
+
+  // Superscript and subscript
+  sup,
+  sub {
+    font-size: 0.75em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+
+  sup {
+    top: -0.5em;
+  }
+
+  sub {
+    bottom: -0.25em;
+  }
+}
+
