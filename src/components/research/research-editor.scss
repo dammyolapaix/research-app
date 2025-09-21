@@ -5,7 +5,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background-color: var(--tt-bg-color, #1a1a1a);
+  background-color: var(--color-background);
 }
 
 .research-editor-content {
@@ -22,7 +22,7 @@
   padding: 1.5rem;
   overflow-y: auto;
   font-family: 'DM Sans', sans-serif;
-  color: var(--tt-theme-text, #ffffff);
+  color: var(--color-foreground);
   background-color: transparent;
   border: none;
   outline: none;
@@ -33,7 +33,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: var(--tt-scrollbar-color, #4a5568);
+    background-color: var(--color-muted-foreground);
     border-radius: 9999px;
   }
 
@@ -49,12 +49,8 @@
   }
 }
 
-// Dark theme adjustments for research UI
-.research-editor-wrapper {
-  --tt-theme-text: #ffffff;
-  --tt-bg-color: #1f2937;
-  --tt-scrollbar-color: #4b5563;
-}
+// Theme adjustments for research UI using shadcn colors
+// Using shadcn color variables - no need for custom variables
 
 // Ensure proper text color inheritance
 .research-editor-content .tiptap.ProseMirror.research-editor {
@@ -64,25 +60,25 @@
   h4,
   h5,
   h6 {
-    color: var(--tt-theme-text, #ffffff);
+    color: var(--color-foreground);
   }
 
   p,
   li,
   blockquote {
-    color: var(--tt-theme-text, #ffffff);
+    color: var(--color-foreground);
   }
 
   // Code blocks and inline code
   code {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #e2e8f0;
+    background-color: var(--color-muted);
+    color: var(--color-foreground);
     padding: 0.125rem 0.25rem;
     border-radius: 0.25rem;
   }
 
   pre {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--color-muted);
     border-radius: 0.5rem;
     padding: 1rem;
 
@@ -94,20 +90,21 @@
 
   // Blockquotes
   blockquote {
-    border-left: 4px solid #3b82f6;
+    border-left: 4px solid var(--color-primary);
     padding-left: 1rem;
     margin: 1rem 0;
-    background-color: rgba(59, 130, 246, 0.1);
+    background-color: var(--color-muted);
     border-radius: 0 0.25rem 0.25rem 0;
   }
 
   // Links
   a {
-    color: #60a5fa;
+    color: var(--color-primary);
     text-decoration: underline;
 
     &:hover {
-      color: #93c5fd;
+      color: var(--color-primary);
+      opacity: 0.8;
     }
   }
 
@@ -149,14 +146,14 @@
   // Horizontal rules
   hr {
     border: none;
-    border-top: 2px solid #374151;
+    border-top: 2px solid var(--color-border);
     margin: 2rem 0;
   }
 
   // Highlights
   mark {
-    background-color: #fbbf24;
-    color: #1f2937;
+    background-color: var(--color-chart-4);
+    color: var(--color-background);
     padding: 0.125rem 0.25rem;
     border-radius: 0.125rem;
   }
@@ -178,4 +175,3 @@
     bottom: -0.25em;
   }
 }
-

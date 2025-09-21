@@ -61,7 +61,7 @@ export function ResultPanel({
 
   if (!literatureReview && !isGenerating) {
     return (
-      <div className="flex h-full items-center justify-center bg-gray-900">
+      <div className="flex h-full items-center justify-center">
         <div className="text-center text-gray-500">
           <FileText className="mx-auto mb-4 h-16 w-16" />
           <h3 className="mb-2 text-xl font-medium">No Research Yet</h3>
@@ -75,19 +75,17 @@ export function ResultPanel({
 
   return (
     <div
-      className={`flex h-full flex-col bg-gray-900 ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
+      className={`flex h-full flex-col ${isFullscreen ? 'fixed inset-0 z-50' : ''}`}
     >
       {/* Header */}
       <div className="border-b border-gray-800">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-400" />
-            <h2 className="text-lg font-semibold text-white">
-              Literature Review
-            </h2>
+            <FileText className="h-5 w-5" />
+            <h2 className="text-lg font-semibold">Literature Review</h2>
             {isGenerating && (
-              <div className="flex items-center gap-2 text-sm text-yellow-400">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-yellow-400"></div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="h-2 w-2 animate-pulse rounded-full"></div>
                 Generating...
               </div>
             )}
@@ -98,7 +96,7 @@ export function ResultPanel({
               variant="ghost"
               size="icon"
               onClick={handleCopy}
-              className="h-8 w-8 text-gray-400 hover:text-white"
+              className="h-8 w-8"
               disabled={!literatureReview}
             >
               <Copy className="h-4 w-4" />
@@ -107,7 +105,7 @@ export function ResultPanel({
               variant="ghost"
               size="icon"
               onClick={handleDownload}
-              className="h-8 w-8 text-gray-400 hover:text-white"
+              className="h-8 w-8"
               disabled={!literatureReview}
             >
               <Download className="h-4 w-4" />
@@ -116,7 +114,7 @@ export function ResultPanel({
               variant="ghost"
               size="icon"
               onClick={() => setIsFullscreen(!isFullscreen)}
-              className="h-8 w-8 text-gray-400 hover:text-white"
+              className="h-8 w-8"
             >
               {isFullscreen ? (
                 <Minimize2 className="h-4 w-4" />
