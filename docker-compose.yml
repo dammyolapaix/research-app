@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:17
+    container_name: research_app
+    hostname: localhost
+    environment:
+      - POSTGRES_PASSWORD=research_app
+      - POSTGRES_USER=research_app
+      - POSTGRES_DB=research_app
+    ports:
+      - 5432:5432
+    volumes:
+      - research_app_data:/var/lib/postgresql/data
+volumes:
+  research_app_data:
