@@ -2,16 +2,7 @@
 
 import { useActionState } from 'react'
 
-import {
-  ArrowUp,
-  FileText,
-  Globe,
-  Loader2,
-  Paperclip,
-  Plus,
-  Search,
-  User,
-} from 'lucide-react'
+import { ArrowUp, Globe, Loader2, Paperclip, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -95,7 +86,7 @@ export const PromptInput = () => {
           </form>
 
           {/* Quick Actions */}
-          <div className="flex flex-wrap justify-center gap-4">
+          {/* <div className="flex flex-wrap justify-center gap-4">
             <Button
               variant="outline"
               className="border-slate-600 px-6 py-3 text-slate-300 hover:bg-slate-800"
@@ -117,7 +108,7 @@ export const PromptInput = () => {
               <User className="mr-2 h-4 w-4" />
               Find Authors
             </Button>
-          </div>
+          </div> */}
         </div>
       </main>
     </>

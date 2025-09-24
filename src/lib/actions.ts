@@ -2,10 +2,9 @@
 
 import { redirect } from 'next/navigation'
 
-import { tasks } from '@trigger.dev/sdk'
 import { z } from 'zod'
 
-import type { findAndSummarizePapersTask } from '@/services/trigger/find-summarize-papers'
+import { createChat } from '@/features/research/queries'
 
 import { validatedAction } from './action-middlewares'
 
@@ -19,20 +18,19 @@ export const researchAction = validatedAction(
   researchSchema,
   async (state: Research) => {
     console.log('Research state: ', state)
+    const id = await createChat()
 
-    const researchTask = await tasks.trigger<typeof findAndSummarizePapersTask>(
-      'find-and-summarize-papers',
-      {
-        prompt: state.prompt,
-        depth: 2,
-        breadth: 2,
-      }
-    )
+    // const researchTask = await tasks.trigger<typeof findAndSummarizePapersTask>(
+    //   'find-and-summarize-papers',
+    //   {
+    //     prompt: state.prompt,
+    //     depth: 2,
+    //     breadth: 2,
+    //   }
+    // )
 
-    console.log('Research task triggered successfully: ', researchTask)
+    // console.log('Research task triggered successfully: ', researchTask)
 
-    redirect(
-      `/dashboard?taskId=${researchTask.id}&publicAccessToken=${researchTask.publicAccessToken}`
-    )
+    redirect(`/research/${id}?prompt=${state.prompt}`)
   }
 )
