@@ -296,17 +296,33 @@ export const searchPapers = async (
   })
 
   const papers = data.results
-    .filter(
-      (paper) =>
-        paper.primary_location &&
+    .filter((paper) => {
+      const hasPdfUrl =
+        paper.primary_location?.pdf_url &&
         paper.primary_location.pdf_url !== null &&
         paper.primary_location.pdf_url !== undefined &&
         paper.primary_location.pdf_url.length > 0
-    )
-    .map((paper) => ({
-      title: paper.title,
-      url: paper.primary_location!.pdf_url!,
-    }))
+
+      const hasOaUrl =
+        paper.open_access?.oa_url &&
+        paper.open_access.oa_url !== null &&
+        paper.open_access.oa_url !== undefined &&
+        paper.open_access.oa_url.length > 0
+
+      return hasPdfUrl || hasOaUrl
+    })
+    .map((paper) => {
+      const pdfUrl = paper.primary_location?.pdf_url
+      const oaUrl = paper.open_access?.oa_url
+
+      // Prefer PDF URL if available, otherwise use OA URL
+      const url = pdfUrl && pdfUrl.length > 0 ? pdfUrl : oaUrl!
+
+      return {
+        title: paper.title,
+        url,
+      }
+    })
   console.log('Found papers: ')
   console.dir(papers, { depth: Infinity })
 
