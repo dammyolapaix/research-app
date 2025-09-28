@@ -9,7 +9,7 @@ export const TRANSFORM_QUERY_TO_OPENALEX_PROMPT = createPrompt({
   backgroundData: `OpenAlex is a comprehensive academic database with the following key filter categories:
 
 **Content & Access Filters:**
-- is_oa: boolean - Open access papers only
+- is_oa: boolean - Open access papers only (use true/false, NOT "true"/"false")
 - language: string - Paper language (ISO 639-1 format)
 - type: string - Work type (article, preprint, review, etc.)
 
@@ -71,6 +71,7 @@ OpenAlex supports logical expressions for more sophisticated filtering:
 - Apply specific filters only when user explicitly mentions them
 - Be conservative with filters - don't over-constrain results
 - Prioritize relevance over precision
+- **CRITICAL**: Use correct data types - booleans (true/false), numbers (2023), strings ("text")
 
 **3. Handle Common User Intent Patterns:**
 - "Recent papers" → from_publication_date: "${new Date().getFullYear() - 3}-01-01" (use date range, NOT publication_year with ranges)
@@ -112,49 +113,134 @@ OpenAlex supports logical expressions for more sophisticated filtering:
       <title>Example 1: Broad Research Topic</title>
       <user_query>I want to research how AI-generated content impacts the academic performance of university students</user_query>
       <transformation>{
-        "search": "AI-generated content academic performance university students",
-        "filter": {
-          "is_oa": true
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "AI-generated content academic performance university students",
+            "filter": {
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "artificial intelligence student learning outcomes",
+            "filter": {
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "AI tools educational technology academic achievement",
+            "filter": {
+              "is_oa": true
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
       <title>Example 2: Specific Methodology Request</title>
       <user_query>Find recent peer-reviewed studies on green infrastructure in urban areas, published in the last 5 years</user_query>
       <transformation>{
-        "search": "green infrastructure urban areas",
-        "filter": {
-          "type": "article",
-          "is_oa": true,
-          "from_publication_date": "${new Date().getFullYear() - 5}-01-01"
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "green infrastructure urban areas",
+            "filter": {
+              "type": "article",
+              "is_oa": true,
+              "from_publication_date": "${new Date().getFullYear() - 5}-01-01"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "sustainable urban planning green spaces",
+            "filter": {
+              "type": "article",
+              "is_oa": true,
+              "from_publication_date": "${new Date().getFullYear() - 5}-01-01"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "urban ecology environmental design cities",
+            "filter": {
+              "type": "article",
+              "is_oa": true,
+              "from_publication_date": "${new Date().getFullYear() - 5}-01-01"
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
       <title>Example 3: Regional Focus</title>
       <user_query>Research on climate change adaptation in African countries, focusing on agriculture</user_query>
       <transformation>{
-        "search": "climate change adaptation agriculture",
-        "filter": {
-          "authorships.institutions.continent": "africa",
-          "is_oa": true
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "climate change adaptation agriculture",
+            "filter": {
+              "authorships.institutions.continent": "africa",
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "agricultural resilience climate variability Africa",
+            "filter": {
+              "authorships.institutions.continent": "africa",
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "farming practices climate change mitigation",
+            "filter": {
+              "authorships.institutions.continent": "africa",
+              "is_oa": true
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
+      <note>Note: The filter uses flat structure with dot-notation keys like "authorships.institutions.continent", NOT nested objects.</note>
     </example>
     <example>
       <title>Example 4: High-Impact Research</title>
       <user_query>Find highly cited papers on machine learning in healthcare from the last 3 years</user_query>
       <transformation>{
-        "search": "machine learning healthcare",
-        "filter": {
-          "from_publication_date": "${new Date().getFullYear() - 3}-01-01",
-          "type": "article",
-          "is_oa": true
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "machine learning healthcare",
+            "filter": {
+              "from_publication_date": "${new Date().getFullYear() - 3}-01-01",
+              "type": "article",
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "artificial intelligence medical diagnosis",
+            "filter": {
+              "from_publication_date": "${new Date().getFullYear() - 3}-01-01",
+              "type": "article",
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "deep learning clinical applications",
+            "filter": {
+              "from_publication_date": "${new Date().getFullYear() - 3}-01-01",
+              "type": "article",
+              "is_oa": true
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
@@ -222,62 +308,170 @@ OpenAlex supports logical expressions for more sophisticated filtering:
       <title>Example 7: Specific Year Request</title>
       <user_query>Find papers on quantum computing published in 2023</user_query>
       <transformation>{
-        "search": "quantum computing",
-        "filter": {
-          "publication_year": 2023,
-          "is_oa": true
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "quantum computing",
+            "filter": {
+              "publication_year": 2023,
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "quantum algorithms quantum information",
+            "filter": {
+              "publication_year": 2023,
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "quantum machine learning quantum computing applications",
+            "filter": {
+              "publication_year": 2023,
+              "is_oa": true
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
       <title>Example 8: Date Range Request</title>
       <user_query>Find research on renewable energy from 2020 to 2022</user_query>
       <transformation>{
-        "search": "renewable energy",
-        "filter": {
-          "from_publication_date": "2020-01-01",
-          "to_publication_date": "2022-12-31",
-          "is_oa": true
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "renewable energy",
+            "filter": {
+              "from_publication_date": "2020-01-01",
+              "to_publication_date": "2022-12-31",
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "solar wind energy sustainability",
+            "filter": {
+              "from_publication_date": "2020-01-01",
+              "to_publication_date": "2022-12-31",
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "clean energy transition climate change",
+            "filter": {
+              "from_publication_date": "2020-01-01",
+              "to_publication_date": "2022-12-31",
+              "is_oa": true
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
       <title>Example 9: Highly Cited Papers</title>
       <user_query>Find highly cited papers on machine learning with more than 50 citations</user_query>
       <transformation>{
-        "search": "machine learning",
-        "filter": {
-          "cited_by_count": ">50",
-          "is_oa": true,
-          "type": "article"
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "machine learning",
+            "filter": {
+              "cited_by_count": ">50",
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "deep learning neural networks",
+            "filter": {
+              "cited_by_count": ">50",
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "artificial intelligence algorithms",
+            "filter": {
+              "cited_by_count": ">50",
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
       <title>Example 10: Exclude Preprints</title>
       <user_query>Find peer-reviewed research on climate change, excluding preprints</user_query>
       <transformation>{
-        "search": "climate change",
-        "filter": {
-          "type": "!preprint",
-          "is_oa": true
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "climate change",
+            "filter": {
+              "type": "!preprint",
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "global warming environmental impact",
+            "filter": {
+              "type": "!preprint",
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "climate adaptation mitigation strategies",
+            "filter": {
+              "type": "!preprint",
+              "is_oa": true
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
       <title>Example 11: Multiple Countries</title>
       <user_query>Find research on artificial intelligence from institutions in France, Germany, or UK</user_query>
       <transformation>{
-        "search": "artificial intelligence",
-        "filter": {
-          "authorships.institutions.country_code": "fr|de|gb",
-          "is_oa": true
-        },
-        "per_page": "3"
+        "queries": [
+          {
+            "search": "artificial intelligence",
+            "filter": {
+              "authorships.institutions.country_code": "fr|de|gb",
+              "is_oa": true
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "machine learning algorithms Europe",
+            "filter": {
+              "authorships.institutions.country_code": "fr|de|gb",
+              "is_oa": true,
+              "type": "article"
+            },
+            "per_page": "3"
+          },
+          {
+            "search": "AI research computer science",
+            "filter": {
+              "authorships.institutions.country_code": "fr|de|gb",
+              "is_oa": true
+            },
+            "per_page": "3"
+          }
+        ]
       }</transformation>
     </example>
     <example>
@@ -311,6 +505,10 @@ OpenAlex supports logical expressions for more sophisticated filtering:
           }
         ]
       }</transformation>
+      <note>CORRECT: Uses flat structure with dot-notation keys like "authorships.institutions.country_code": "ng|gh"</note>
+      <note>WRONG: Would be nested objects like {"authorships": {"institutions": {"country_code": "ng|gh"}}}</note>
+      <note>CORRECT: Uses boolean values like "is_oa": true</note>
+      <note>WRONG: Would be string values like "is_oa": "true"</note>
     </example>
 </examples>`,
 
@@ -368,7 +566,10 @@ OpenAlex supports logical expressions for more sophisticated filtering:
   - For numerical comparisons, use string format: "cited_by_count": ">10"
   - For negation, use string format: "type": "!preprint"
   - For OR operations, use string format: "country_code": "fr|de|gb"
-  - Only include filters that are explicitly relevant to each specific query strategy`,
+  - Only include filters that are explicitly relevant to each specific query strategy
+  - **IMPORTANT**: Use flat object structure with dot-notation keys for nested filters (e.g., "authorships.institutions.continent": "africa", NOT nested objects like {"authorships": {"institutions": {"continent": "africa"}}})
+  - **CRITICAL**: Use actual boolean values (true/false) for boolean fields like is_oa, NOT string values ("true"/"false")
+  - **CRITICAL**: Use actual numbers for numeric fields like publication_year, NOT string values ("2023")`,
 })
 
 export const ANALYZE_RESEARCH_PAPER_SYSTEM_PROMPT = createPrompt({
