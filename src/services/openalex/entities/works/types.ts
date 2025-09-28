@@ -343,8 +343,8 @@ export type WorksFilters = {
   'biblio.volume'?: string
 
   // Citation and impact filters
-  cited_by_count?: number
-  fwci?: number
+  cited_by_count?: string
+  fwci?: string
 
   // Concept filters
   'concepts.id'?: string
