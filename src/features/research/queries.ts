@@ -25,3 +25,7 @@ export const getChat = async (id: string): Promise<Chat | null> => {
 export const saveChat = async (id: string, messages: UIMessage[]) => {
   await db.update(chats).set({ messages }).where(eq(chats.id, id))
 }
+
+export const updateChat = async (id: string, data: Partial<Chat>) => {
+  await db.update(chats).set(data).where(eq(chats.id, id))
+}
