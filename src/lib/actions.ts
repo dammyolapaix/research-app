@@ -1,10 +1,10 @@
 'use server'
 
-import { tasks } from '@trigger.dev/sdk'
+import { redirect } from 'next/navigation'
+
 import { z } from 'zod'
 
-import { createChat, updateChat } from '@/features/research/queries'
-import { findAndSummarizePapersTask } from '@/services/trigger/find-summarize-papers'
+import { saveChat } from '@/features/chats/queries'
 
 import { validatedAction } from './action-middlewares'
 
@@ -18,28 +18,28 @@ export const researchAction = validatedAction(
   researchSchema,
   async (state: Research) => {
     console.log('Research state: ', state)
-    const id = await createChat()
+    const chat = await saveChat({})
 
-    if (!id) return { error: 'Failed to create chat' }
+    if (!chat) return { error: 'Failed to create chat' }
 
-    const triggerResearchRun = await tasks.trigger<
-      typeof findAndSummarizePapersTask
-    >('find-and-summarize-papers', {
-      prompt: state.prompt,
-      chatId: id,
-      depth: 2,
-      breadth: 2,
-    })
+    // const triggerResearchRun = await tasks.trigger<
+    //   typeof findAndSummarizePapersTask
+    // >('find-and-summarize-papers', {
+    //   prompt: state.prompt,
+    //   chatId: id,
+    //   depth: 2,
+    //   breadth: 2,
+    // })
 
-    await updateChat(id, {
-      triggerRunId: triggerResearchRun.id,
-      triggerPublicAccessToken: triggerResearchRun.publicAccessToken,
-    })
+    // await updateChat(id, {
+    //   triggerRunId: triggerResearchRun.id,
+    //   triggerPublicAccessToken: triggerResearchRun.publicAccessToken,
+    // })
 
     // console.log('Research task triggered successfully: ', researchTask)
 
-    return { success: 'Research task triggered successfully' }
+    // return { success: 'Research task triggered successfully' }
 
-    // redirect(`/research/${id}?prompt=${state.prompt}`)
+    redirect(`/research/${chat.id}?prompt=${state.prompt}`)
   }
 )

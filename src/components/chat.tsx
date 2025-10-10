@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { UIMessage, useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import hardenReactMarkdown from 'harden-react-markdown'
-import { MessageSquare, SearchIcon, Wand2Icon } from 'lucide-react'
+import { MessageSquare } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 import {
@@ -31,23 +31,8 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { OpenAlexParamsSchemasType } from '@/lib/research'
 
-import {
-  ChainOfThought,
-  ChainOfThoughtContent,
-  ChainOfThoughtHeader,
-  ChainOfThoughtSearchResult,
-  ChainOfThoughtSearchResults,
-  ChainOfThoughtStep,
-} from './ai-elements/chain-of-thought'
 import { Loader } from './ai-elements/loader'
-import {
-  Source,
-  Sources,
-  SourcesContent,
-  SourcesTrigger,
-} from './ai-elements/sources'
 
 // Create a hardened version of ReactMarkdown
 const HardenedMarkdown = hardenReactMarkdown(ReactMarkdown)
@@ -129,12 +114,15 @@ Long-term benefits of central bank independence are even more pronounced than sh
                     ) : (
                       messages.map((message) => (
                         <div key={message.id}>
-                          {message.parts.map((part) => {
+                          {message.parts.map((part, partIndex) => {
                             switch (part.type) {
                               case 'text':
                                 return (
-                                  <Message key={message.id} from={message.role}>
-                                    <MessageContent key={message.id}>
+                                  <Message
+                                    key={`${message.id}-${partIndex}`}
+                                    from={message.role}
+                                  >
+                                    <MessageContent>
                                       <HardenedMarkdown>
                                         {part.text}
                                       </HardenedMarkdown>
@@ -142,67 +130,69 @@ Long-term benefits of central bank independence are even more pronounced than sh
                                   </Message>
                                 )
 
-                              case 'tool-generateOpenAlexParams':
-                                return (
-                                  <ChainOfThought defaultOpen>
-                                    <ChainOfThoughtHeader />
-                                    <ChainOfThoughtContent>
-                                      <ChainOfThoughtStep
-                                        icon={Wand2Icon}
-                                        label="Generating search queries"
-                                        status="complete"
-                                      >
-                                        <ChainOfThoughtSearchResults>
-                                          {(
-                                            part.output as OpenAlexParamsSchemasType
-                                          )?.queries?.map((query) => (
-                                            <ChainOfThoughtSearchResult
-                                              key={query.search}
-                                            >
-                                              {query.search}
-                                            </ChainOfThoughtSearchResult>
-                                          ))}
-                                        </ChainOfThoughtSearchResults>
-                                      </ChainOfThoughtStep>
-                                    </ChainOfThoughtContent>
-                                  </ChainOfThought>
-                                )
+                              // case 'tool-generateOpenAlexParams':
+                              //   return (
+                              //     <ChainOfThought defaultOpen>
+                              //       <ChainOfThoughtHeader />
+                              //       <ChainOfThoughtContent>
+                              //         <ChainOfThoughtStep
+                              //           icon={Wand2Icon}
+                              //           label="Generating search queries"
+                              //           status="complete"
+                              //         >
+                              //           <ChainOfThoughtSearchResults>
+                              //             {(
+                              //               part.output as OpenAlexParamsSchemasType
+                              //             )?.queries?.map((query) => (
+                              //               <ChainOfThoughtSearchResult
+                              //                 key={query.search}
+                              //               >
+                              //                 {query.search}
+                              //               </ChainOfThoughtSearchResult>
+                              //             ))}
+                              //           </ChainOfThoughtSearchResults>
+                              //         </ChainOfThoughtStep>
+                              //       </ChainOfThoughtContent>
+                              //     </ChainOfThought>
+                              //   )
 
-                              case 'tool-searchPapers':
-                                const papers = part.output as Array<{
-                                  title: string
-                                  url: string
-                                }>
-                                return (
-                                  <ChainOfThought defaultOpen>
-                                    <ChainOfThoughtHeader />
-                                    <ChainOfThoughtContent>
-                                      <ChainOfThoughtStep
-                                        icon={SearchIcon}
-                                        label="Searching for papers"
-                                        status="complete"
-                                      >
-                                        <Sources>
-                                          <SourcesTrigger
-                                            count={papers?.length || 0}
-                                          >
-                                            Found {papers?.length || 0} research
-                                            papers
-                                          </SourcesTrigger>
-                                          <SourcesContent>
-                                            {papers?.map((paper, index) => (
-                                              <Source
-                                                key={index}
-                                                href={paper.url}
-                                                title={paper.title}
-                                              />
-                                            ))}
-                                          </SourcesContent>
-                                        </Sources>
-                                      </ChainOfThoughtStep>
-                                    </ChainOfThoughtContent>
-                                  </ChainOfThought>
-                                )
+                              // case 'tool-searchPapers':
+                              //   const papers = part.output as Array<{
+                              //     title: string
+                              //     url: string
+                              //   }>
+
+                              //   console.log('papers', papers)
+                              //   return (
+                              //     <ChainOfThought defaultOpen>
+                              //       <ChainOfThoughtHeader />
+                              //       <ChainOfThoughtContent>
+                              //         <ChainOfThoughtStep
+                              //           icon={SearchIcon}
+                              //           label="Searching for papers"
+                              //           status="complete"
+                              //         >
+                              //           <Sources>
+                              //             <SourcesTrigger
+                              //               count={papers?.length || 0}
+                              //             >
+                              //               Found {papers?.length || 0} research
+                              //               papers
+                              //             </SourcesTrigger>
+                              //             {/* <SourcesContent>
+                              //               {papers?.map((paper, index) => (
+                              //                 <Source
+                              //                   key={index}
+                              //                   href={paper.url}
+                              //                   title={paper.title}
+                              //                 />
+                              //               ))}
+                              //             </SourcesContent> */}
+                              //           </Sources>
+                              //         </ChainOfThoughtStep>
+                              //       </ChainOfThoughtContent>
+                              //     </ChainOfThought>
+                              //   )
                             }
                           })}
                         </div>

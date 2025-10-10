@@ -3,15 +3,28 @@ import {
   Tool,
   UIMessage,
   convertToModelMessages,
-  createIdGenerator,
   stepCountIs,
   streamText,
   validateUIMessages,
 } from 'ai'
 
-import { getChat, saveChat } from '@/features/research/queries'
-import { tools } from '@/features/research/tools'
+import { getChatById, saveMessage } from '@/features/chats/queries'
+import {
+  createResearchTool,
+  evaluatePaperTool,
+  generateSearchQueriesTool,
+  getPaperContentTool,
+  searchPapersTool,
+} from '@/lib/ai/tools'
 import { RESEARCH_TOOLS_SYSTEM_PROMPT } from '@/lib/prompts'
+
+const tools = {
+  createResearch: createResearchTool,
+  generateSearchQueries: generateSearchQueriesTool,
+  searchPapers: searchPapersTool,
+  getPaperContent: getPaperContentTool,
+  evaluatePaper: evaluatePaperTool,
+}
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -19,10 +32,13 @@ export const maxDuration = 30
 export async function POST(req: Request) {
   const { message, id }: { message: UIMessage; id: string } = await req.json()
 
-  const chat = await getChat(id)
+  const chat = await getChatById(id)
+  if (!chat) {
+    return new Response('Chat not found', { status: 404 })
+  }
 
   // Append new message to previousMessages messages
-  const messages = [...(chat?.messages ?? []), message]
+  const messages = [...(chat.messages ?? []), message]
 
   // Validate loaded messages against
   // tools, data parts schema, and metadata schema
@@ -55,13 +71,13 @@ export async function POST(req: Request) {
 
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
-    // Generate consistent server-side IDs for persistence:
-    generateMessageId: createIdGenerator({
-      prefix: 'msg',
-      size: 16,
-    }),
     onFinish: ({ messages }) => {
-      saveChat(id, messages)
+      saveMessage(
+        messages.map(({ id: _, ...message }) => ({
+          chatId: id,
+          ...message,
+        }))
+      )
     },
   })
 }
