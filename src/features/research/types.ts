@@ -1,8 +1,20 @@
-import { UIMessage } from 'ai'
-import { InferSelectModel } from 'drizzle-orm'
+import { InferInsertModel } from 'drizzle-orm'
 
-import { chats } from './schema'
+import { PAPER_EVALUATIONS } from './constants'
+import { researchPapers, researchSearchQueries, researches } from './schema'
 
-export type Chat = Omit<InferSelectModel<typeof chats>, 'messages'> & {
-  messages: Array<UIMessage>
+export type InsertResearch = InferInsertModel<typeof researches>
+
+export type InsertResearchSearchQueries = InferInsertModel<
+  typeof researchSearchQueries
+>
+
+export type InsertResearchPapers = InferInsertModel<typeof researchPapers>
+
+export type Evaluation = (typeof PAPER_EVALUATIONS)[number]
+
+export type EvaluatePaper = {
+  paperId: string
+  evaluation: Evaluation
+  evaluationReasoning: string
 }

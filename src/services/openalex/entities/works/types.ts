@@ -1,3 +1,5 @@
+import { OpenAlexParams } from '../../types'
+
 // Base entity types
 export type BaseEntity = {
   id: string
@@ -487,6 +489,8 @@ export type WorksFilters = {
   to_updated_date?: DateFilterValue
   version?: VersionFilterValue
 }
+
+export type GetWorksOpenAlexParams = OpenAlexParams<WorksFilters, {}, {}>
 
 // Work response type for API calls
 export type WorkResponse = {

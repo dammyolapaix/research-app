@@ -1,10 +1,10 @@
 import { buildFilterParams } from '../../filter-builder'
 import { HttpClient } from '../../http-client'
-import { OpenAlexParams, OpenAlexResponse } from '../../types'
-import { Work, WorksFilters } from './types'
+import { OpenAlexResponse } from '../../types'
+import { GetWorksOpenAlexParams, Work } from './types'
 
 // Export filter builder utilities from the generic filter builder
-export { FilterBuilder, buildFilterParams } from '../../filter-builder'
+export { buildFilterParams, FilterBuilder } from '../../filter-builder'
 
 export class Works {
   private httpClient: HttpClient
@@ -19,9 +19,7 @@ export class Works {
    * @param filters - Type-safe filter object
    * @param additionalParams - Additional query parameters (search, sort, page, per_page, etc.)
    */
-  async get(
-    params: OpenAlexParams<WorksFilters, {}, {}>
-  ): Promise<OpenAlexResponse<Work>> {
+  async get(params: GetWorksOpenAlexParams): Promise<OpenAlexResponse<Work>> {
     // Convert filters to query parameters
     const filterParams = buildFilterParams(params.filter ?? {})
 
