@@ -6,7 +6,13 @@ import { useEffect, useState } from 'react'
 import { UIMessage, useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import hardenReactMarkdown from 'harden-react-markdown'
-import { MessageSquare, SearchIcon, Wand2Icon } from 'lucide-react'
+import {
+  CheckCircleIcon,
+  FileTextIcon,
+  MessageSquare,
+  SearchIcon,
+  Wand2Icon,
+} from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 import {
@@ -25,6 +31,7 @@ import {
   PromptInputToolbar,
 } from '@/components/ai-elements/prompt-input'
 import { ResultPanel } from '@/components/research/result-panel'
+import { Badge } from '@/components/ui/badge'
 import {
   ResizableHandle,
   ResizablePanel,
@@ -185,8 +192,6 @@ Long-term benefits of central bank independence are even more pronounced than sh
                                   url: string
                                 }>
 
-                                console.log('papers', papers)
-
                                 return (
                                   <ChainOfThought
                                     key={`${message.id}-${partIndex}-searchPapers`}
@@ -216,6 +221,123 @@ Long-term benefits of central bank independence are even more pronounced than sh
                                             ))}
                                           </SourcesContent>
                                         </Sources>
+                                      </ChainOfThoughtStep>
+                                    </ChainOfThoughtContent>
+                                  </ChainOfThought>
+                                )
+
+                              case 'tool-getPaperContent':
+                                const papersContent = part.output as Array<{
+                                  title: string
+                                  url: string
+                                }>
+
+                                return (
+                                  <ChainOfThought
+                                    key={`${message.id}-${partIndex}-getPaperContent`}
+                                    defaultOpen
+                                  >
+                                    <ChainOfThoughtHeader />
+                                    <ChainOfThoughtContent>
+                                      <ChainOfThoughtStep
+                                        icon={FileTextIcon}
+                                        label="Getting paper content"
+                                        status="complete"
+                                      >
+                                        {papersContent?.map((paper) => (
+                                          <Source
+                                            key={paper.url}
+                                            href={paper.url}
+                                            title={paper.title}
+                                          />
+                                        ))}
+                                      </ChainOfThoughtStep>
+                                    </ChainOfThoughtContent>
+                                  </ChainOfThought>
+                                )
+
+                              case 'tool-evaluatePaper':
+                                const evaluatedPaper = part.output as {
+                                  title?: string
+                                  url?: string
+                                  evaluation?: string
+                                  evaluationReasoning?: string
+                                  data?: string
+                                }
+
+                                // Handle case where no paper was evaluated
+                                if (
+                                  !evaluatedPaper ||
+                                  evaluatedPaper.data ||
+                                  !evaluatedPaper.title
+                                ) {
+                                  return (
+                                    <ChainOfThought
+                                      key={`${message.id}-${partIndex}-evaluatePaper`}
+                                      defaultOpen
+                                    >
+                                      <ChainOfThoughtHeader />
+                                      <ChainOfThoughtContent>
+                                        <ChainOfThoughtStep
+                                          icon={CheckCircleIcon}
+                                          label="Evaluating papers"
+                                          status="complete"
+                                        >
+                                          <div className="text-muted-foreground text-sm">
+                                            {evaluatedPaper?.data ||
+                                              'No papers to evaluate'}
+                                          </div>
+                                        </ChainOfThoughtStep>
+                                      </ChainOfThoughtContent>
+                                    </ChainOfThought>
+                                  )
+                                }
+
+                                return (
+                                  <ChainOfThought
+                                    key={`${message.id}-${partIndex}-evaluatePaper`}
+                                    defaultOpen
+                                  >
+                                    <ChainOfThoughtHeader />
+                                    <ChainOfThoughtContent>
+                                      <ChainOfThoughtStep
+                                        icon={CheckCircleIcon}
+                                        label="Evaluating papers"
+                                        status="complete"
+                                      >
+                                        <div className="space-y-3">
+                                          <div className="space-y-2 rounded-lg border p-3">
+                                            <div className="flex items-center justify-between">
+                                              <h4 className="text-sm font-medium">
+                                                {evaluatedPaper.title}
+                                              </h4>
+                                              <Badge
+                                                variant={
+                                                  evaluatedPaper.evaluation ===
+                                                  'relevant'
+                                                    ? 'default'
+                                                    : 'secondary'
+                                                }
+                                                className="text-xs"
+                                              >
+                                                {evaluatedPaper.evaluation}
+                                              </Badge>
+                                            </div>
+                                            <p className="text-muted-foreground text-xs">
+                                              {
+                                                evaluatedPaper.evaluationReasoning
+                                              }
+                                            </p>
+                                            <a
+                                              href={evaluatedPaper.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-xs text-blue-600 hover:underline"
+                                            >
+                                              View paper →
+                                            </a>
+                                          </div>
+                                        </div>
                                       </ChainOfThoughtStep>
                                     </ChainOfThoughtContent>
                                   </ChainOfThought>

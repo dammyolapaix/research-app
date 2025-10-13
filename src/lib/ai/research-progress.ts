@@ -1,4 +1,5 @@
 import {
+  allPapersAreEvaluated,
   allPapersHaveContent as allPapersHaveContentQuery,
   getNonEvaluatedPapers,
   getNonSearchedResearchSearchQuery,
@@ -65,6 +66,7 @@ export const getResearchProgress = async (
   // Get papers without evaluation
   const papersWithoutEvaluation = await getNonEvaluatedPapers(researchId)
   const hasPapersWithoutEvaluation = papersWithoutEvaluation.length > 0
+  const allPapersEvaluated = await allPapersAreEvaluated(researchId)
 
   // Get papers with content for counting
   const papersWithContent = await getResearchPapersWithContent(researchId)
@@ -82,7 +84,7 @@ export const getResearchProgress = async (
     hasPapersWithoutEvaluation,
     allQueriesProcessed: !hasUnprocessedQueries,
     allPapersHaveContent,
-    allPapersEvaluated: !hasPapersWithoutEvaluation,
+    allPapersEvaluated,
     totalQueries: 3, // We always generate 3 queries
     processedQueries: hasUnprocessedQueries ? 0 : 3, // Simplified
     totalPapers,

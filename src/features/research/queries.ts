@@ -149,6 +149,17 @@ export const evaluatePaper = async ({
   return paper
 }
 
+export const allPapersAreEvaluated = async (researchId: string) => {
+  const papers = await getResearchPapers(researchId)
+
+  // If no papers exist, return false
+  if (papers.length === 0) return false
+
+  return papers.every((researchPaper) => {
+    return researchPaper.evaluation !== null
+  })
+}
+
 export const getResearchPapers = async (researchId: string) => {
   const papers = await db.query.researchPapers.findMany({
     where: eq(researchPapers.researchId, researchId),
@@ -157,6 +168,16 @@ export const getResearchPapers = async (researchId: string) => {
     },
   })
   return papers
+}
+
+export const getResearchPaperById = async (researchPaperId: string) => {
+  const paper = await db.query.researchPapers.findFirst({
+    where: eq(researchPapers.id, researchPaperId),
+    with: {
+      paper: true,
+    },
+  })
+  return paper
 }
 
 export const allPapersHaveContent = async (researchId: string) => {

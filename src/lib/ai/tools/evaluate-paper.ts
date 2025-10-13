@@ -6,6 +6,7 @@ import { PAPER_EVALUATIONS } from '@/features/research/constants'
 import {
   evaluatePaper as evaluatePaperQuery,
   getNonEvaluatedPapers,
+  getResearchPaperById,
 } from '@/features/research/queries'
 
 const evaluatePaper = async ({
@@ -15,9 +16,9 @@ const evaluatePaper = async ({
   researchId: string
   query: string
 }) => {
-  const pendingPaper = (await getNonEvaluatedPapers(researchId)).pop()
+  const pendingResearchPaper = (await getNonEvaluatedPapers(researchId)).pop()
 
-  if (!pendingPaper) return { data: 'No pending papers to evaluate' }
+  if (!pendingResearchPaper) return { data: 'No pending paper to evaluate' }
 
   const { object } = await generateObject({
     model: openai('gpt-4.1-nano'),
@@ -32,20 +33,29 @@ const evaluatePaper = async ({
         ),
     }),
     prompt: `Evaluate whether the paper is relevant and will help answer the following query: ${JSON.stringify(query)}. 
-        
-    <paper>
-    ${pendingPaper.paper.content}
-    </paper>
-    `,
+          
+      <paper>
+      ${pendingResearchPaper.paper.content}
+      </paper>
+      `,
   })
 
   await evaluatePaperQuery({
-    paperId: pendingPaper.paperId,
+    paperId: pendingResearchPaper.id,
     evaluation: object.evaluation,
     evaluationReasoning: object.reasoning,
   })
 
-  return { data: 'Paper evaluated and saved to the database' }
+  const researchPaper = await getResearchPaperById(pendingResearchPaper.id)
+
+  if (!researchPaper) return { data: 'Paper not found' }
+
+  return {
+    title: researchPaper.paper.title,
+    url: researchPaper.paper.url,
+    evaluation: researchPaper.evaluation,
+    evaluationReasoning: researchPaper.evaluationReasoning,
+  }
 }
 
 export const evaluatePaperTool = tool({

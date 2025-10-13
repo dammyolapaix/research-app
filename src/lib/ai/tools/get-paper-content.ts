@@ -2,6 +2,7 @@ import { tool } from 'ai'
 import { z } from 'zod'
 
 import {
+  getResearchPapers,
   getResearchPapersWithNoContent,
   updatePaperContentByUrl,
 } from '@/features/research/queries'
@@ -35,17 +36,21 @@ export const getPaperContentTool = tool({
   execute: async ({ researchId }) => {
     const papersWithNoContent = await getResearchPapersWithNoContent(researchId)
 
-    if (papersWithNoContent.length === 0)
-      return { data: 'No paper found with no content' }
+    if (papersWithNoContent.length > 0) {
+      const urls = papersWithNoContent.map((paper) => paper.paper.url)
 
-    const urls = papersWithNoContent.map((paper) => paper.paper.url)
+      const papersWithContent = await getBatchPaperContent(urls)
 
-    const papersWithContent = await getBatchPaperContent(urls)
-
-    for (const paper of papersWithContent) {
-      await updatePaperContentByUrl(paper.url, paper.markdown)
+      for (const paper of papersWithContent) {
+        await updatePaperContentByUrl(paper.url, paper.markdown)
+      }
     }
 
-    return { data: 'Papers contents found and saved to the database' }
+    const papers = await getResearchPapers(researchId)
+
+    return papers.map((paper) => ({
+      title: paper.paper.title,
+      url: paper.paper.url,
+    }))
   },
 })

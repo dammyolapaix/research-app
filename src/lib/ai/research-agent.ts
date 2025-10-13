@@ -5,7 +5,7 @@ import { RESEARCH_TOOLS_SYSTEM_PROMPT } from '../prompts'
 // Import progress tracking
 import { getResearchProgress } from './research-progress'
 // Import stop conditions
-import { allPapersHaveContent } from './research-stop-conditions'
+import { allPapersEvaluated } from './research-stop-conditions'
 import { tools } from './tools'
 
 export const researchAgent = new Agent({
@@ -14,8 +14,8 @@ export const researchAgent = new Agent({
   tools,
   stopWhen: [
     // allQueriesProcessed,
-    allPapersHaveContent,
-    // allPapersEvaluated,
+    // allPapersHaveContent,
+    allPapersEvaluated,
     // stepCountIs(5), // Safety limit
   ],
   prepareStep: async ({
@@ -86,9 +86,9 @@ export const researchAgent = new Agent({
         return { toolChoice: { type: 'tool', toolName: 'getPaperContent' } }
       }
 
-      // if (researchState.hasPapersWithoutEvaluation) {
-      //   return { toolChoice: { type: 'tool', toolName: 'evaluatePaper' } }
-      // }
+      if (researchState.hasPapersWithoutEvaluation) {
+        return { toolChoice: { type: 'tool', toolName: 'evaluatePaper' } }
+      }
 
       // If everything is complete, let the agent decide (should generate final response)
       return {}
