@@ -16,17 +16,6 @@ import { PAPER_EVALUATIONS } from './constants'
 
 export const evaluationEnum = pgEnum('evaluation', PAPER_EVALUATIONS)
 
-// export const messages = pgTable('messages', {
-//   id: uuid().primaryKey().notNull().defaultRandom(),
-//   chatId: uuid()
-//     .notNull()
-//     .references(() => chats.id, { onDelete: 'cascade' }),
-//   role: roleEnum().notNull(),
-//   parts: json().notNull(),
-//   // attachments: json().notNull(),
-//   ...timestamps,
-// })
-
 export const researches = pgTable('researches', {
   id: uuid().primaryKey().notNull().defaultRandom(),
   title: text().notNull().default('Untitled Research'),

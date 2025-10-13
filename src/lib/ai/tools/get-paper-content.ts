@@ -2,10 +2,10 @@ import { tool } from 'ai'
 import { z } from 'zod'
 
 import {
-  getResearchPaperWithNoContent,
-  updatePaperContent,
+  getResearchPapersWithNoContent,
+  updatePaperContentByUrl,
 } from '@/features/research/queries'
-import { scrape } from '@/services/firecrawl'
+import { batchScrape, scrape } from '@/services/firecrawl'
 
 const getPaperContent = async (url: string, title?: string) => {
   if (title) {
@@ -21,6 +21,11 @@ const getPaperContent = async (url: string, title?: string) => {
   return markdown
 }
 
+export const getBatchPaperContent = async (urls: string[]) => {
+  const markdown = await batchScrape(urls)
+  return markdown
+}
+
 export const getPaperContentTool = tool({
   description:
     'Get a paper content from a research paper with no content. The content is saved to the database.',
@@ -28,19 +33,19 @@ export const getPaperContentTool = tool({
     researchId: z.string().describe('The ID of the research'),
   }),
   execute: async ({ researchId }) => {
-    const paperWithNoContent = await getResearchPaperWithNoContent(researchId)
+    const papersWithNoContent = await getResearchPapersWithNoContent(researchId)
 
-    if (!paperWithNoContent) return { data: 'No paper found with no content' }
+    if (papersWithNoContent.length === 0)
+      return { data: 'No paper found with no content' }
 
-    // Get the paper content from the URL
-    const content = await getPaperContent(
-      paperWithNoContent.url,
-      paperWithNoContent.title
-    )
+    const urls = papersWithNoContent.map((paper) => paper.paper.url)
 
-    // Update the paper with the scraped content
-    await updatePaperContent(paperWithNoContent.id, content)
+    const papersWithContent = await getBatchPaperContent(urls)
 
-    return { data: 'Paper content found and saved to the database' }
+    for (const paper of papersWithContent) {
+      await updatePaperContentByUrl(paper.url, paper.markdown)
+    }
+
+    return { data: 'Papers contents found and saved to the database' }
   },
 })

@@ -1,12 +1,12 @@
 'use client'
 
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { UIMessage, useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import hardenReactMarkdown from 'harden-react-markdown'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, SearchIcon, Wand2Icon } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 import {
@@ -31,8 +31,23 @@ import {
   ResizablePanelGroup,
 } from '@/components/ui/resizable'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { OpenAlexParamsSchemasType } from '@/lib/research'
 
+import {
+  ChainOfThought,
+  ChainOfThoughtContent,
+  ChainOfThoughtHeader,
+  ChainOfThoughtSearchResult,
+  ChainOfThoughtSearchResults,
+  ChainOfThoughtStep,
+} from './ai-elements/chain-of-thought'
 import { Loader } from './ai-elements/loader'
+import {
+  Source,
+  Sources,
+  SourcesContent,
+  SourcesTrigger,
+} from './ai-elements/sources'
 
 // Create a hardened version of ReactMarkdown
 const HardenedMarkdown = hardenReactMarkdown(ReactMarkdown)
@@ -43,8 +58,6 @@ type Props = {
 }
 
 export default function Chat({ id, initialMessages }: Props) {
-  const router = useRouter()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
 
   const [input, setInput] = useState('')
@@ -52,11 +65,14 @@ export default function Chat({ id, initialMessages }: Props) {
   const { messages, sendMessage, status } = useChat({
     id,
     messages: initialMessages,
+    experimental_throttle: 100,
     transport: new DefaultChatTransport({
       api: '/api/research',
       // only send the last message to the server:
       prepareSendMessagesRequest({ messages, id }) {
-        return { body: { message: messages[messages.length - 1], id } }
+        return {
+          body: { message: messages[messages.length - 1], id },
+        }
       },
     }),
   })
@@ -74,10 +90,14 @@ export default function Chat({ id, initialMessages }: Props) {
 
   useEffect(() => {
     if (prompt) {
-      handleSubmit({ text: prompt })
-      router.push(pathname as '/research/[id]')
+      sendMessage({
+        role: 'user' as const,
+        parts: [{ type: 'text', text: prompt }],
+      })
+
+      window.history.replaceState({}, '', `/research/${id}`)
     }
-  }, [prompt])
+  }, [prompt, sendMessage, id])
 
   const mockLiteratureReview = `# The Effect of Institutional Qualities on Inflation
 
@@ -130,69 +150,76 @@ Long-term benefits of central bank independence are even more pronounced than sh
                                   </Message>
                                 )
 
-                              // case 'tool-generateOpenAlexParams':
-                              //   return (
-                              //     <ChainOfThought defaultOpen>
-                              //       <ChainOfThoughtHeader />
-                              //       <ChainOfThoughtContent>
-                              //         <ChainOfThoughtStep
-                              //           icon={Wand2Icon}
-                              //           label="Generating search queries"
-                              //           status="complete"
-                              //         >
-                              //           <ChainOfThoughtSearchResults>
-                              //             {(
-                              //               part.output as OpenAlexParamsSchemasType
-                              //             )?.queries?.map((query) => (
-                              //               <ChainOfThoughtSearchResult
-                              //                 key={query.search}
-                              //               >
-                              //                 {query.search}
-                              //               </ChainOfThoughtSearchResult>
-                              //             ))}
-                              //           </ChainOfThoughtSearchResults>
-                              //         </ChainOfThoughtStep>
-                              //       </ChainOfThoughtContent>
-                              //     </ChainOfThought>
-                              //   )
+                              case 'tool-generateSearchQueries':
+                                return (
+                                  <ChainOfThought
+                                    key={`${message.id}-${partIndex}-generateSearchQueries`}
+                                    defaultOpen
+                                  >
+                                    <ChainOfThoughtHeader />
+                                    <ChainOfThoughtContent>
+                                      <ChainOfThoughtStep
+                                        icon={Wand2Icon}
+                                        label="Generating search queries"
+                                        status="complete"
+                                      >
+                                        <ChainOfThoughtSearchResults>
+                                          {(
+                                            part?.output as OpenAlexParamsSchemasType['queries']
+                                          )?.map((query) => (
+                                            <ChainOfThoughtSearchResult
+                                              key={query.search}
+                                            >
+                                              {query.search}
+                                            </ChainOfThoughtSearchResult>
+                                          ))}
+                                        </ChainOfThoughtSearchResults>
+                                      </ChainOfThoughtStep>
+                                    </ChainOfThoughtContent>
+                                  </ChainOfThought>
+                                )
 
-                              // case 'tool-searchPapers':
-                              //   const papers = part.output as Array<{
-                              //     title: string
-                              //     url: string
-                              //   }>
+                              case 'tool-searchPapers':
+                                const papers = part.output as Array<{
+                                  title: string
+                                  url: string
+                                }>
 
-                              //   console.log('papers', papers)
-                              //   return (
-                              //     <ChainOfThought defaultOpen>
-                              //       <ChainOfThoughtHeader />
-                              //       <ChainOfThoughtContent>
-                              //         <ChainOfThoughtStep
-                              //           icon={SearchIcon}
-                              //           label="Searching for papers"
-                              //           status="complete"
-                              //         >
-                              //           <Sources>
-                              //             <SourcesTrigger
-                              //               count={papers?.length || 0}
-                              //             >
-                              //               Found {papers?.length || 0} research
-                              //               papers
-                              //             </SourcesTrigger>
-                              //             {/* <SourcesContent>
-                              //               {papers?.map((paper, index) => (
-                              //                 <Source
-                              //                   key={index}
-                              //                   href={paper.url}
-                              //                   title={paper.title}
-                              //                 />
-                              //               ))}
-                              //             </SourcesContent> */}
-                              //           </Sources>
-                              //         </ChainOfThoughtStep>
-                              //       </ChainOfThoughtContent>
-                              //     </ChainOfThought>
-                              //   )
+                                console.log('papers', papers)
+
+                                return (
+                                  <ChainOfThought
+                                    key={`${message.id}-${partIndex}-searchPapers`}
+                                    defaultOpen
+                                  >
+                                    <ChainOfThoughtHeader />
+                                    <ChainOfThoughtContent>
+                                      <ChainOfThoughtStep
+                                        icon={SearchIcon}
+                                        label="Searching for papers"
+                                        status="complete"
+                                      >
+                                        <Sources>
+                                          <SourcesTrigger
+                                            count={papers?.length || 0}
+                                          >
+                                            Found {papers?.length || 0} research
+                                            papers
+                                          </SourcesTrigger>
+                                          <SourcesContent>
+                                            {papers?.map((paper) => (
+                                              <Source
+                                                key={paper.url}
+                                                href={paper.url}
+                                                title={paper.title}
+                                              />
+                                            ))}
+                                          </SourcesContent>
+                                        </Sources>
+                                      </ChainOfThoughtStep>
+                                    </ChainOfThoughtContent>
+                                  </ChainOfThought>
+                                )
                             }
                           })}
                         </div>

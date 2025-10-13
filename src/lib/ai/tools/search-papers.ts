@@ -70,6 +70,9 @@ export const searchPapersTool = tool({
       markResearchSearchQueryAsSearched(query.id),
     ])
 
-    return { data: 'Papers searched and saved to the database' }
+    return searchResultsPapers.map((paper) => ({
+      title: paper.title,
+      url: paper.url,
+    }))
   },
 })

@@ -20,8 +20,22 @@ import {
 } from './types'
 
 export const createResearch = async (data: InsertResearch) => {
-  const research = await db.insert(researches).values(data).returning()
+  const [research] = await db.insert(researches).values(data).returning()
   return research
+}
+
+export const getResearchById = async (researchId: string) => {
+  const research = await db.query.researches.findFirst({
+    where: eq(researches.id, researchId),
+  })
+  return research
+}
+
+export const hasResearchSearchQueries = async (researchId: string) => {
+  const searchQueries = await db.query.researchSearchQueries.findFirst({
+    where: eq(researchSearchQueries.researchId, researchId),
+  })
+  return searchQueries !== null
 }
 
 export const saveResearchSearchQueries = async (
@@ -135,17 +149,37 @@ export const evaluatePaper = async ({
   return paper
 }
 
-export const getResearchPapersWithNoContent = async (researchId: string) => {
-  // Get all research papers for this research with their associated paper data
-  const allPapers = await db.query.researchPapers.findMany({
+export const getResearchPapers = async (researchId: string) => {
+  const papers = await db.query.researchPapers.findMany({
     where: eq(researchPapers.researchId, researchId),
     with: {
       paper: true,
     },
   })
+  return papers
+}
+
+export const allPapersHaveContent = async (researchId: string) => {
+  console.log('checking all papers have content.................', researchId)
+  const papers = await getResearchPapers(researchId)
+  console.log('papers.................', papers)
+
+  // If no papers exist, return false
+  if (papers.length === 0) return false
+
+  return papers.every((researchPaper) => {
+    const content = researchPaper.paper.content
+    console.log('content.................', content)
+    return content && content.trim() !== ''
+  })
+}
+
+export const getResearchPapersWithNoContent = async (researchId: string) => {
+  // Get all research papers for this research with their associated paper data
+  const papers = await getResearchPapers(researchId)
 
   // Filter papers that have no content (null, undefined, or empty string)
-  return allPapers.filter((researchPaper) => {
+  return papers.filter((researchPaper) => {
     const content = researchPaper.paper.content
     return !content || content.trim() === ''
   })
@@ -172,11 +206,11 @@ export const getResearchPapersWithContent = async (researchId: string) => {
   })
 }
 
-export const updatePaperContent = async (paperId: string, content: string) => {
+export const updatePaperContentByUrl = async (url: string, content: string) => {
   const [updatedPaper] = await db
     .update(papers)
     .set({ content })
-    .where(eq(papers.id, paperId))
+    .where(eq(papers.url, url))
     .returning()
 
   return updatedPaper

@@ -1,30 +1,7 @@
-import { openai } from '@ai-sdk/openai'
-import {
-  Tool,
-  UIMessage,
-  convertToModelMessages,
-  stepCountIs,
-  streamText,
-  validateUIMessages,
-} from 'ai'
+import { Tool, UIMessage, convertToModelMessages, validateUIMessages } from 'ai'
 
 import { getChatById, saveMessage } from '@/features/chats/queries'
-import {
-  createResearchTool,
-  evaluatePaperTool,
-  generateSearchQueriesTool,
-  getPaperContentTool,
-  searchPapersTool,
-} from '@/lib/ai/tools'
-import { RESEARCH_TOOLS_SYSTEM_PROMPT } from '@/lib/prompts'
-
-const tools = {
-  createResearch: createResearchTool,
-  generateSearchQueries: generateSearchQueriesTool,
-  searchPapers: searchPapersTool,
-  getPaperContent: getPaperContentTool,
-  evaluatePaper: evaluatePaperTool,
-}
+import { researchAgent } from '@/lib/ai/research-agent'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -40,29 +17,19 @@ export async function POST(req: Request) {
   // Append new message to previousMessages messages
   const messages = [...(chat.messages ?? []), message]
 
-  // Validate loaded messages against
-  // tools, data parts schema, and metadata schema
+  // Validate loaded messages against tools, data parts schema, and metadata schema
   const validatedMessages = await validateUIMessages({
     messages,
-    tools: tools as { [x: string]: Tool<unknown, unknown> | undefined }, // Ensures tool calls in messages match current schemas
+    tools: researchAgent.tools as {
+      [x: string]: Tool<unknown, unknown> | undefined
+    },
   })
 
   console.log('Validated messages: ', validatedMessages)
 
-  const result = streamText({
-    model: openai('gpt-4.1-nano'),
-    system: RESEARCH_TOOLS_SYSTEM_PROMPT,
+  // Use the research agent to handle the research workflow
+  const result = researchAgent.stream({
     messages: convertToModelMessages(validatedMessages),
-    stopWhen: stepCountIs(5),
-    tools,
-    onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
-      console.log('Step finish: ')
-      console.log('Text: ', text)
-      console.log('Tool calls: ', toolCalls)
-      console.log('Tool results: ', toolResults)
-      console.log('Finish reason: ', finishReason)
-      console.log('Usage: ', usage)
-    },
   })
 
   // consume the stream to ensure it runs to completion & triggers onFinish
@@ -71,9 +38,9 @@ export async function POST(req: Request) {
 
   return result.toUIMessageStreamResponse({
     originalMessages: messages,
-    onFinish: ({ messages }) => {
+    onFinish: ({ messages }: { messages: UIMessage[] }) => {
       saveMessage(
-        messages.map(({ id: _, ...message }) => ({
+        messages.map(({ id: _, ...message }: UIMessage) => ({
           chatId: id,
           ...message,
         }))

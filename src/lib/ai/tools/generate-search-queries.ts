@@ -223,9 +223,7 @@ const generateSearchQueries = async ({ query, n = 3, researchId }: Search) => {
 
   await saveResearchSearchQueries(queries)
 
-  return {
-    data: 'Search queries generated and saved to the database',
-  }
+  return result.object.queries
 }
 
 export const generateSearchQueriesTool = tool({
